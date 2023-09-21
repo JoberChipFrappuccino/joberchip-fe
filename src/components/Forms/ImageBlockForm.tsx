@@ -6,8 +6,8 @@ import styles from './ImageBlockForm.module.scss'
 
 type Props = {
   block: {
-    alt: string
-    src: string
+    alt?: string
+    src?: string
   }
 }
 
