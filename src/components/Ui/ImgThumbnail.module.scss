@@ -34,14 +34,12 @@
     position: relative;
     border-radius: .25rem;
     img {
-      width: auto;
+      display: flex;
+      // width: auto;
       height: auto;
     }
     .minus {
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       display: none;
       position: absolute;
       align-items: center;

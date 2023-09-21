@@ -1,4 +1,3 @@
-/* eslint-disable multiline-ternary */
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { HiOutlineMinusCircle } from 'react-icons/hi'
 import styles from './ImgThumbnail.module.scss'
