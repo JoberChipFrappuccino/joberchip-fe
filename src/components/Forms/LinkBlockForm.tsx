@@ -5,8 +5,8 @@ import styles from './LinkBlockForm.module.scss'
 
 type Props = {
   block: {
-    text: string
-    url: string
+    text?: string
+    url?: string
   }
 }
 
