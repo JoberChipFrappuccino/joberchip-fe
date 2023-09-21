@@ -46,7 +46,7 @@ export function ActionBlockFormBase({ children }: Props) {
   ]
   return (
     <div style={{ display: 'flex', height: '100%', flexDirection: 'column' }}>
-      <div>
+      <div className={styles.ActionBlockFormBaseContainer}>
         <h2>
           {formTypes.find((form) => form.type === blockType)?.title} {drawerMode === 'create' ? '추가' : '수정'}하기
         </h2>
