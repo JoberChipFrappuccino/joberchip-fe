@@ -7,18 +7,26 @@ import { type BlockType } from '@/models/space'
 interface Props {
   blockType: BlockType
 }
+
+const PropsData = {
+  alt: undefined,
+  src: undefined,
+  text: undefined,
+  url: undefined
+}
+
 function getCreateFormComponent({ blockType }: Props) {
   switch (blockType) {
     case 'text':
       return <TextBlockForm />
     case 'image':
-      return <ImageBlockForm block={''} />
+      return <ImageBlockForm block={PropsData} />
     case 'link':
-      return <LinkBlockForm block={''} />
+      return <LinkBlockForm block={PropsData} />
     case 'embed':
       return <h1>Embed block form example</h1>
     case 'video':
-      return <VideoBlockForm block={''} />
+      return <VideoBlockForm block={PropsData} />
     case 'googleMap':
       return <h1>GoogleMap block form example</h1>
     case 'page':
