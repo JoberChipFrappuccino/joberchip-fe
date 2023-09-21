@@ -10,8 +10,6 @@ interface Props<T extends BlockType> {
   mode: DrawerMode
 }
 function getEditFormComponent<T extends BlockType>({ block, mode }: Props<T>) {
-  // eslint-disable-next-line no-console
-  console.log('asdafasdfasdf', block)
   switch (block.type) {
     case 'text':
       return <TextBlockForm block={block} />
