@@ -6,7 +6,7 @@ import styles from './VideoBlockForm.module.scss'
 
 type Props = {
   block: {
-    src: string
+    src?: string
   }
 }
 
