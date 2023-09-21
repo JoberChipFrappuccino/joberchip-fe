@@ -15,10 +15,21 @@ export function LinkBlock({ block, mode }: Props) {
         <BlockLogo logo={block.url} />
         <div className={styles.titleUrl}>
           <span>{block.text}</span>
-          <a href={block.url}>{block.url}</a>
+          {block.w === 1 ? (
+            <a style={{ display: 'none' }} href={block.url}>
+              {block.url}
+            </a>
+          ) : (
+            <a href={block.url}>{block.url}</a>
+          )}
         </div>
       </div>
-      <div className={styles.footer}>
+      <div
+        className={styles.footer}
+        onClick={() => {
+          window.location.href = block.url
+        }}
+      >
         <div className={styles.footerLeft}>바로가기</div>
         <div className={styles.footerright} />
       </div>

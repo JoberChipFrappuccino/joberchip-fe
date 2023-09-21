@@ -3,49 +3,60 @@
   height: 100%;
   display: flex;
   overflow: hidden;
-  border-radius: 0.625rem;
-  flex-direction: column;
-  background-color: white;
-  justify-content: center;
   align-items: center;
+  flex-direction: column;
+  border-radius: 0.625rem;
+  justify-content: center;
+  background-color: white;
 
   .itemBox {
     width: 100%;
     height: 100%;
     display: flex;
+    padding-bottom: 1rem;
     padding-top: 1.25rem;
     padding-left: 1.25rem;
     .titleUrl {
       display: flex;
-      flex-direction: column;
+      max-width: 200px;
+      overflow: hidden;
+      padding-top: 3px;
       margin-left: 1.25rem;
+      flex-direction: column;
       span {
         display: flex;
         font-weight: 700;
         font-size: 0.875rem;
       }
       a {
+        color: #c9c9c9;
         font-size: 0.75rem;
+        &:hover {
+          color: #4c61ff;
+        }
       }
     }
   }
-  .footer {
+}
+.footer {
+  width: 100%;
+  height: 50px;
+  color: white;
+  display: flex;
+  cursor: pointer;
+  background-color: black;
+  justify-content: space-between;
+  .footerLeft {
+    height: 100%;
     display: flex;
-    width: 100%;
-    color: white;
-    height: 2.1875rem;
-    background-color: black;
-    justify-content: space-between;
-    .footerLeft {
-      display: flex;
-      padding-left: 1.25rem;
-      align-items: center;
-    }
-    .footerright {
-      display: flex;
-      width: 2.1875rem;
-      background-color: #3b4753;
-    }
+    align-items: center;
+    padding-left: 1.25rem;
+    p {padding: .5rem 0}
+  }
+  .footerright {
+    display: flex;
+    width: 2.1875rem;
+    background-color: #3b4753;
   }
 }
 
@@ -57,4 +68,12 @@
 .cover {
   width: 100%;
   height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .titleUrl {
+    a {
+      display: none;
+    }
+  }
 }
