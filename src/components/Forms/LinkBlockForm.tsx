@@ -1,5 +1,5 @@
 /* eslint-disable object-shorthand */
-import { addLinkBlockAPI } from '@/api/blocks'
+import { addLinkBlockAPI, editLinkBlockAPI } from '@/api/blocks'
 import { useBlockAction } from '@/store/blockAction'
 import { useSharePageStore } from '@/store/sharePage'
 import { getNextYOfLastBlock } from '@/utils/api'
@@ -19,16 +19,18 @@ export function LinkBlockForm({ block }: BlockBaseWithBlockFormProps<TLink>) {
 
   const titleValue = block?.title ?? ''
   const linkValue = block?.src ?? ''
+  const blockId = block?.objectId ?? ''
 
   useEffect(() => {
     setTitle(titleValue ?? '')
     setLink(linkValue ?? '')
   }, [titleValue, linkValue])
 
-  const submitAddHandler = async (e: FormEvent<HTMLFormElement>) => {
+  /** 링크 블록 정보 API 전달 함수 */
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const pageId = sharePage.pageId
-    const data = {
+    const addData = {
       x: 0,
       y: getNextYOfLastBlock(sharePage.children),
       w: 2,
@@ -38,36 +40,38 @@ export function LinkBlockForm({ block }: BlockBaseWithBlockFormProps<TLink>) {
       type: 'LINK',
       visible: true
     }
+    const editData = {
+      title: title,
+      link: link
+    }
     try {
       if (drawerMode === 'create') {
-        const { data: responseData } = await addLinkBlockAPI(pageId, data)
+        const { data: responseData } = await addLinkBlockAPI(pageId, addData)
         const updatedSharePage = {
           ...sharePage,
-          children: [...sharePage.children, responseData]
+          children: [...sharePage.children, { ...responseData }]
         }
         setSharePage(updatedSharePage)
         setOpenDrawer(false)
       } else if (drawerMode === 'edit') {
-        await addLinkBlockAPI(pageId, {
-          title: title,
-          link: link
-        })
-        // const newBlocks = [...sharePage.children.push(res.data)]
+        const { data: responseData } = await editLinkBlockAPI(pageId, blockId, editData)
+        const existingBlockIndex = sharePage.children.findIndex((block) => block.objectId === responseData.objectId)
+        const updatedChildren = [...sharePage.children]
+        if (existingBlockIndex !== -1) {
+          updatedChildren[existingBlockIndex] = responseData
+        } else {
+          updatedChildren.push(responseData)
+        }
+        const updatedSharePage = {
+          ...sharePage,
+          children: updatedChildren
+        }
+        setSharePage(updatedSharePage)
         setOpenDrawer(false)
       }
     } catch (error) {
       console.error(error)
     }
-  }
-
-  const submitEditHandler = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const body = {
-      text: title,
-      url: link
-    }
-    // body에 data를 담아 post 전달 알림창으로 체크
-    alert(JSON.stringify(body))
   }
 
   const onChangeLink = (e: ChangeEvent<HTMLInputElement>) => {
@@ -88,9 +92,9 @@ export function LinkBlockForm({ block }: BlockBaseWithBlockFormProps<TLink>) {
 
   return (
     <div className={styles.container}>
-      <form className={styles.formBox} onSubmit={drawerMode === 'create' ? submitAddHandler : submitEditHandler}>
+      <form className={styles.formBox} onSubmit={drawerMode === 'create' ? submitHandler : submitHandler}>
         <div className={styles.forms}>
-          <h3>URL 링크 주소 제목</h3>
+          <h3>URL 링크 주소 제목*</h3>
           <div className={styles.inputbox}>
             <input type="text" value={title} onChange={onChangeTitle} placeholder="링크 제목을 입력해주세요." />
             {title && (
@@ -99,7 +103,7 @@ export function LinkBlockForm({ block }: BlockBaseWithBlockFormProps<TLink>) {
               </button>
             )}
           </div>
-          <h3 className={styles.formTexts}>URL 링크 주소 삽입</h3>
+          <h3 className={styles.formTexts}>URL 링크 주소 삽입*</h3>
           <div className={styles.inputbox}>
             <input type="text" value={link} onChange={onChangeLink} placeholder="링크 주소를 입력해주세요." />
             {link && (

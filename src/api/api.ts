@@ -11,7 +11,6 @@ const authAPI = axios.create({
 authAPI.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(ACCESS_TOKEN) ? localStorage.getItem(ACCESS_TOKEN) : ''
-    config.headers['Content-Type'] = 'application/json; charset=utf-8'
     config.headers.Authorization = token
     return config
   },

@@ -1,3 +1,4 @@
+import { addVideoBlockAPI, editVideoBlockAPI } from '@/api/blocks'
 import { useBlockAction } from '@/store/blockAction'
 import { useSharePageStore } from '@/store/sharePage'
 import { getNextYOfLastBlock } from '@/utils/api'
@@ -9,14 +10,17 @@ import VideoThumbnail from '../Ui/VideoThumbnail'
 import styles from './VideoBlockForm.module.scss'
 
 export function VideoBlockForm({ block }: BlockBaseWithBlockFormProps<TVideo>) {
-  const { sharePage } = useSharePageStore()
+  const { sharePage, setSharePage } = useSharePageStore()
   const [selectedRadio, setSelectedRadio] = useState('radio1')
   const [thumbnail, setThumbnail] = useState<string>('')
   const [videoUrl, setVideoUrl] = useState<string>('')
   const { drawerMode } = useBlockAction()
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const { setOpenDrawer } = useBlockAction()
+  const [youtubeThumb, setYoutubeThumb] = useState<string>('')
 
   const thumbnailValue = block?.src ?? ''
+  const blockId = block?.objectId ?? ''
 
   useEffect(() => {
     setThumbnail(thumbnailValue ?? '')
@@ -35,28 +39,81 @@ export function VideoBlockForm({ block }: BlockBaseWithBlockFormProps<TVideo>) {
         setVideoUrl('')
       }
     }
-  }, [thumbnailValue])
+    if (videoUrl.includes('be/')) {
+      setYoutubeThumb(videoUrl.split('be/')[1])
+    } else if (videoUrl.includes('v=')) {
+      setYoutubeThumb(videoUrl.split('v=')[1])
+    }
+  }, [thumbnailValue, videoUrl])
 
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (drawerMode === 'create') {
-      const body = {
-        x: 0,
-        y: getNextYOfLastBlock(sharePage.children),
-        w: 1,
-        h: 1,
-        src: thumbnail
+    const pageId = sharePage.pageId
+
+    // Base64 이미지 데이터를 File 객체로 변환하는 기능
+    const base64ImageData = thumbnail
+    const blob = await fetch(base64ImageData).then((response) => response.blob())
+    const file = new File([blob], 'image.png', { type: 'image/png' })
+
+    const addData = {
+      x: 0,
+      y: getNextYOfLastBlock(sharePage.children),
+      w: 2,
+      h: 2,
+      title: file.name,
+      videoLink: `https://www.youtube.com/embed/${youtubeThumb}`,
+      attachedVideo: file,
+      type: 'VIDEO',
+      visible: true
+    }
+
+    const editData = {
+      videoLink: `https://www.youtube.com/embed/${youtubeThumb}`,
+      attachedVideo: file
+    }
+
+    const addform = new FormData()
+    addform.append('x', addData.x.toString())
+    addform.append('y', addData.y.toString())
+    addform.append('w', addData.w.toString())
+    addform.append('h', addData.h.toString())
+    addform.append('title', addData.title)
+    addData.videoLink && addform.append('videoLink', addData.videoLink)
+    addData.attachedVideo && addform.append('attachedVideo', addData.attachedVideo)
+    addform.append('type', addData.type)
+    addform.append('visible', addData.visible.toString())
+
+    const editform = new FormData()
+    editform.append('videoLink', editData.videoLink)
+    editform.append('attachedVideo', editData.attachedVideo)
+
+    try {
+      if (drawerMode === 'create') {
+        const { data: responseData } = await addVideoBlockAPI(pageId, addform)
+        const updatedSharePage = {
+          ...sharePage,
+          children: [...sharePage.children, { ...responseData }]
+        }
+        setSharePage(updatedSharePage)
+        setOpenDrawer(false)
+      } else if (drawerMode === 'edit') {
+        const { data: responseData } = await editVideoBlockAPI(pageId, blockId, editform)
+        const existingBlockIndex = sharePage.children.findIndex((block) => block.objectId === responseData.objectId)
+        const updatedChildren = [...sharePage.children]
+        if (existingBlockIndex !== -1) {
+          updatedChildren[existingBlockIndex] = responseData
+        } else {
+          updatedChildren.push(responseData)
+        }
+        const updatedSharePage = {
+          ...sharePage,
+          children: updatedChildren
+        }
+        setSharePage(updatedSharePage)
+        setOpenDrawer(false)
       }
-      // body에 data를 담아 post 전달 알림창으로 체크
-      alert(JSON.stringify(body))
-      // eslint-disable-next-line no-console
-      console.log('블록들의 상태', block)
-    } else if (drawerMode === 'edit') {
-      const body = {
-        src: thumbnail
-      }
-      // body에 data를 담아 post 전달 알림창으로 체크
-      alert(JSON.stringify(body))
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -92,7 +149,7 @@ export function VideoBlockForm({ block }: BlockBaseWithBlockFormProps<TVideo>) {
                 checked={selectedRadio === 'radio1'}
                 onChange={handleRadioChange}
               />
-              <h3>동영상 URL 첨부*</h3>
+              <h3>동영상 URL 첨부</h3>
             </div>
             <div className={styles.inputbox}>
               <input

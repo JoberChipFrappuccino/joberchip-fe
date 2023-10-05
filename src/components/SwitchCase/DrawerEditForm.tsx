@@ -18,7 +18,7 @@ function getEditFormComponent<T extends BlockType>({ block }: BlockBaseWithBlock
     case IMAGE:
       return <ImageBlockForm block={block} />
     case LINK:
-      return <LinkBlockForm block={block} />
+      return <LinkBlockForm block={block} key={block.objectId} />
     case EMBED:
       return <h1>Embed block form example</h1>
     case VIDEO:

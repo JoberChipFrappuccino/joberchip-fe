@@ -1,4 +1,5 @@
 /* eslint-disable object-shorthand */
+import { addImageBlockAPI, editImageBlockAPI } from '@/api/blocks'
 import { useBlockAction } from '@/store/blockAction'
 import { useSharePageStore } from '@/store/sharePage'
 import { getNextYOfLastBlock } from '@/utils/api'
@@ -10,47 +11,93 @@ import ImgThumbnail from '../Ui/ImgThumbnail'
 import styles from './ImageBlockForm.module.scss'
 
 export function ImageBlockForm({ block }: BlockBaseWithBlockFormProps<TImage>) {
-  const { sharePage } = useSharePageStore()
+  const { sharePage, setSharePage } = useSharePageStore()
   const [thumbnail, setThumbnail] = useState<string>('')
   const [title, setTitle] = useState<string>('')
   const isButtonDisabled = !title || !thumbnail
   const { drawerMode } = useBlockAction()
+  const { setOpenDrawer } = useBlockAction()
 
-  const titleValue = block?.alt ?? ''
+  const titleValue = block?.title ?? ''
   const thumbnailValue = block?.src ?? ''
+  const blockId = block?.objectId ?? ''
 
   useEffect(() => {
     setTitle(titleValue ?? '')
     setThumbnail(thumbnailValue ?? '')
   }, [titleValue, thumbnailValue])
 
-  const submitHandler = (e: FormEvent<HTMLFormElement>) => {
+  /** 이미지 블록 정보 API 전달 함수 */
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (drawerMode === 'create') {
-      const body = {
-        x: 0,
-        y: getNextYOfLastBlock(sharePage.children),
-        w: 1,
-        h: 1,
-        title: title,
-        attachedImage: thumbnail
+    const pageId = sharePage.pageId
+
+    // Base64 이미지 데이터를 File 객체로 변환하는 기능
+    const base64ImageData = thumbnail
+    const blob = await fetch(base64ImageData).then((response) => response.blob())
+    const file = new File([blob], 'image.png', { type: 'image/png' })
+
+    const addData = {
+      x: 0,
+      y: getNextYOfLastBlock(sharePage.children),
+      w: 2,
+      h: 2,
+      title: title,
+      attachedImage: file,
+      type: 'IMAGE',
+      visible: true
+    }
+
+    const editData = {
+      title: title,
+      attachedImage: file
+    }
+
+    const addform = new FormData()
+    addform.append('x', addData.x.toString())
+    addform.append('y', addData.y.toString())
+    addform.append('w', addData.w.toString())
+    addform.append('h', addData.h.toString())
+    addform.append('title', addData.title)
+    addform.append('attachedImage', addData.attachedImage, 'image.png')
+    addform.append('type', addData.type)
+    addform.append('visible', addData.visible.toString())
+
+    const editform = new FormData()
+    editform.append('title', editData.title)
+    editform.append('attachedImage', editData.attachedImage, 'image.png')
+
+    try {
+      if (drawerMode === 'create') {
+        const { data: responseData } = await addImageBlockAPI(pageId, addform)
+        const updatedSharePage = {
+          ...sharePage,
+          children: [...sharePage.children, { ...responseData }]
+        }
+        setSharePage(updatedSharePage)
+        setOpenDrawer(false)
+      } else if (drawerMode === 'edit') {
+        const { data: responseData } = await editImageBlockAPI(pageId, blockId, editform)
+        const existingBlockIndex = sharePage.children.findIndex((block) => block.objectId === responseData.objectId)
+        const updatedChildren = [...sharePage.children]
+        if (existingBlockIndex !== -1) {
+          updatedChildren[existingBlockIndex] = responseData
+        } else {
+          updatedChildren.push(responseData)
+        }
+        const updatedSharePage = {
+          ...sharePage,
+          children: updatedChildren
+        }
+        setSharePage(updatedSharePage)
+        setOpenDrawer(false)
       }
-      // body에 data를 담아 post 전달 알림창으로 체크
-      alert(JSON.stringify(body))
-      // eslint-disable-next-line no-console
-      console.log('블록들의 상태', block)
-    } else if (drawerMode === 'edit') {
-      const body = {
-        title: title,
-        attachedImage: thumbnail
-      }
-      // body에 data를 담아 post 전달 알림창으로 체크
-      alert(JSON.stringify(body))
+    } catch (error) {
+      console.error(error)
     }
   }
 
   const onChangetitle = (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
     setTitle(e.target.value)
   }
 
@@ -71,7 +118,7 @@ export function ImageBlockForm({ block }: BlockBaseWithBlockFormProps<TImage>) {
               </button>
             )}
           </div>
-          <h3 className={styles.formText}>사진 첨부</h3>
+          <h3 className={styles.formText}>사진 첨부*</h3>
           <ImgThumbnail img={thumbnail} imgData={setThumbnail} />
         </div>
         <FormButton title={drawerMode === 'create' ? '사진 추가하기' : '사진 수정하기'} event={isButtonDisabled} />

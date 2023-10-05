@@ -39,7 +39,7 @@ export interface TextBlock extends BlockBase<TText> {
 
 export interface ImageBlock extends BlockBase<TImage> {
   src: string
-  alt: string
+  title: string
 }
 
 export interface LinkBlock extends BlockBase<TLink> {
