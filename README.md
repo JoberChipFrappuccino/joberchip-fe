@@ -31,7 +31,7 @@
 ## 👤 TEAM JOBERCHIP
 
 **FRONT-END**
-|[정태욱](https://github.com/peacepiece7)(👑)|[김다슬](https://github.com/7581058-UQ)|[박철민](https://github.com/DICEPT)|[백지욱](https://github.com/atsunsetree)|[주하림](https://github.com/nyeJiiii)|
+|[정태욱](https://github.com/peacepiece7)(👑)|[김다슬](https://github.com/7581058-UQ)|[박철민](https://github.com/DICEPT)|[백지욱](https://github.com/beakjiuk)|[주하림](https://github.com/nyeJiiii)|
 |:---:|:---:|:---:|:---:|:---:|
 |<a href="https://github.com/gdtknight"><img src="https://avatars.githubusercontent.com/u/73880776?v=4" width=150px alt="정태욱">|<a href="https://github.com/Horaiz-UQ"><img src="https://avatars.githubusercontent.com/u/100559990?v=4" width=150px alt="김다슬">|<a href="https://github.com/DICEPT"><img src="https://avatars.githubusercontent.com/u/106785596?v=4" width=150px alt="박철민">|<a href="https://github.com/beakjiuk"><img src="https://avatars.githubusercontent.com/u/83908991?v=4" width=150px alt="백지욱">|<a href="https://github.com/wngkfla01"><img src="https://avatars.githubusercontent.com/u/64509945?v=4" width=150px alt="주하림">|
 
