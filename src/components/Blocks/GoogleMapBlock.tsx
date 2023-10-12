@@ -4,33 +4,27 @@ import { useEffect, useState } from 'react'
 import { SkeletonTheme } from 'react-loading-skeleton'
 import { type BlockBaseWithBlockProps } from '../SwitchCase/ViewerBox'
 import styles from './GoogleMapBlock.module.scss'
-interface Props {
-  latitude: number
-  longitude: number
-  lat?: BlockBaseWithBlockProps<TMap>['block']['latitude']
-  lng?: BlockBaseWithBlockProps<TMap>['block']['longitude']
-}
 
 export function GoogleMapBlock({ block, mode }: BlockBaseWithBlockProps<TMap>) {
-  const location: Props = block?.src ? JSON.parse(block.src.replace(/\\/g, '')) : {}
+  const location = block?.src ? JSON.parse(block.src) : {}
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API ?? '',
     libraries: ['places']
   })
-  const [isLoading, setIsLoading] = useState(true) // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
     if (!isLoaded) {
-      setIsLoading(true) // 로딩 중
+      setIsLoading(true)
       return
     }
-    setIsLoading(false) // 로딩 완료
-    // 여기에서 다른 동작을 수행할 수 있습니다.
+    setIsLoading(false)
   }, [isLoaded])
 
-  const [center] = useState({
+  const center = {
     lat: location?.latitude ?? block?.latitude ?? 37.5642135,
     lng: location?.longitude ?? block?.longitude ?? 127.0016985
-  })
+  }
 
   return (
     <div className={styles.container}>

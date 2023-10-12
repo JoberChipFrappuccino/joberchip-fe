@@ -8,6 +8,7 @@ import { Autocomplete, GoogleMap, Marker, useJsApiLoader } from '@react-google-m
 import { Input } from 'antd'
 import { type SearchProps } from 'antd/es/input/Search'
 import React, { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { TiDeleteOutline } from 'react-icons/ti'
 import { SkeletonTheme } from 'react-loading-skeleton'
 import { type BlockBaseWithBlockFormProps } from '../SwitchCase/DrawerEditForm'
 import FormButton from '../Ui/Button'
@@ -108,13 +109,26 @@ export function GoogleMapBlockForm({ block }: BlockBaseWithBlockFormProps<TMap>)
         toast('지도가 추가되었습니다.', 'success', { autoClose: 500 })
         setOpenDrawer(false)
       } else if (drawerMode === 'edit') {
-        await editGoogleMapBlockAPI(pageId, blockId, {
+        const { data: responseData } = await editGoogleMapBlockAPI(pageId, blockId, {
           latitude: center.lat,
           longitude: center.lng,
           address
         })
+        const existingBlockIndex = sharePage.children.findIndex((block) => block.objectId === responseData.objectId)
+        const updatedChildren = [...sharePage.children]
+        if (existingBlockIndex !== -1) {
+          updatedChildren[existingBlockIndex] = responseData
+        } else {
+          updatedChildren.push(responseData)
+        }
+        const updatedSharePage = {
+          ...sharePage,
+          children: updatedChildren
+        }
+        setSharePage(updatedSharePage)
         toast('지도가 수정되었습니다.', 'success', { autoClose: 500 })
         setOpenDrawer(false)
+        setAddress('')
       }
     } catch (error) {
       console.error(error)
@@ -181,6 +195,11 @@ export function GoogleMapBlockForm({ block }: BlockBaseWithBlockFormProps<TMap>)
           <h3>상세주소</h3>
           <div className={styles.inputbox}>
             <input type="text" value={address} onChange={onChangeAddress} placeholder="주소를 입력해주세요" />
+            {address && (
+              <button type="button" className={styles.delTitle} onClick={() => setAddress('')}>
+                <TiDeleteOutline />
+              </button>
+            )}
           </div>
         </div>
         <FormButton title={drawerMode === 'create' ? '지도 추가하기' : '지도 수정하기'} event={isButtonDisabled} />
